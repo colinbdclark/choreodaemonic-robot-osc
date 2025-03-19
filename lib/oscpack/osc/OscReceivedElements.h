@@ -25,12 +25,12 @@
 */
 
 /*
-	The text above constitutes the entire oscpack license; however, 
+	The text above constitutes the entire oscpack license; however,
 	the oscpack developer(s) also make the following non-binding requests:
 
 	Any person wishing to distribute modifications to the Software is
 	requested to send the modifications to the original developer so that
-	they can be incorporated into the canonical version. It is also 
+	they can be incorporated into the canonical version. It is also
 	requested that these non-binding requests be included whenever the
 	above license is reproduced.
 */
@@ -89,7 +89,7 @@ class ReceivedPacket{
 public:
     // Although the OSC spec is not entirely clear on this, we only support
     // packets up to 0x7FFFFFFC bytes long (the maximum 4-byte aligned value
-    // representable by an int32). An exception will be raised if you pass a 
+    // representable by an int32). An exception will be raised if you pass a
     // larger value to the ReceivedPacket() constructor.
 
     ReceivedPacket( const char *contents, osc_bundle_element_size_t size )
@@ -100,7 +100,7 @@ public:
         : contents_( contents )
         , size_( ValidateSize( (osc_bundle_element_size_t)size ) ) {}
 
-#if !(defined(__x86_64__) || defined(_M_X64))
+#if !(defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__))
     ReceivedPacket( const char *contents, int size )
         : contents_( contents )
         , size_( ValidateSize( (osc_bundle_element_size_t)size ) ) {}
@@ -118,7 +118,7 @@ private:
 
     static osc_bundle_element_size_t ValidateSize( osc_bundle_element_size_t size )
     {
-        // sanity check integer types declared in OscTypes.h 
+        // sanity check integer types declared in OscTypes.h
         // you'll need to fix OscTypes.h if any of these asserts fail
         assert( sizeof(osc::int32) == 4 );
         assert( sizeof(osc::uint32) == 4 );
@@ -195,7 +195,7 @@ private:
 
 inline bool operator==(const ReceivedBundleElementIterator& lhs,
         const ReceivedBundleElementIterator& rhs )
-{	
+{
 	return lhs.IsEqualTo( rhs );
 }
 
@@ -213,7 +213,7 @@ public:
 		, argumentPtr_( argumentPtr ) {}
 
     friend class ReceivedMessageArgumentIterator;
-    
+
 	char TypeTag() const { return *typeTagPtr_; }
 
     // the unchecked methods below don't check whether the argument actually
@@ -271,7 +271,7 @@ public:
     bool IsBlob() const { return *typeTagPtr_ == BLOB_TYPE_TAG; }
     void AsBlob( const void*& data, osc_bundle_element_size_t& size ) const;
     void AsBlobUnchecked( const void*& data, osc_bundle_element_size_t& size ) const;
-    
+
     bool IsArrayBegin() const { return *typeTagPtr_ == ARRAY_BEGIN_TYPE_TAG; }
     bool IsArrayEnd() const { return *typeTagPtr_ == ARRAY_END_TYPE_TAG; }
     // Calculate the number of top-level items in the array. Nested arrays count as one item.
@@ -322,13 +322,13 @@ private:
 
 inline bool operator==(const ReceivedMessageArgumentIterator& lhs,
         const ReceivedMessageArgumentIterator& rhs )
-{	
+{
 	return lhs.IsEqualTo( rhs );
 }
 
 inline bool operator!=(const ReceivedMessageArgumentIterator& lhs,
         const ReceivedMessageArgumentIterator& rhs )
-{	
+{
 	return !( lhs == rhs );
 }
 
@@ -341,7 +341,7 @@ class ReceivedMessageArgumentStream{
         , end_( end ) {}
 
     ReceivedMessageArgumentIterator p_, end_;
-    
+
 public:
 
     // end of stream
@@ -367,7 +367,7 @@ public:
 
         rhs = (*p_++).AsInt32();
         return *this;
-    }     
+    }
 
     ReceivedMessageArgumentStream& operator>>( float& rhs )
     {
@@ -413,7 +413,7 @@ public:
         rhs = (*p_++).AsInt64();
         return *this;
     }
-    
+
     ReceivedMessageArgumentStream& operator>>( TimeTag& rhs )
     {
         if( Eos() )
@@ -440,7 +440,7 @@ public:
         (*p_++).AsBlob( rhs.data, rhs.size );
         return *this;
     }
-    
+
     ReceivedMessageArgumentStream& operator>>( const char*& rhs )
     {
         if( Eos() )
@@ -449,7 +449,7 @@ public:
         rhs = (*p_++).AsString();
         return *this;
     }
-    
+
     ReceivedMessageArgumentStream& operator>>( Symbol& rhs )
     {
         if( Eos() )
@@ -489,12 +489,12 @@ public:
 
 
     typedef ReceivedMessageArgumentIterator const_iterator;
-    
+
 	ReceivedMessageArgumentIterator ArgumentsBegin() const
     {
         return ReceivedMessageArgumentIterator( typeTagsBegin_, arguments_ );
     }
-     
+
 	ReceivedMessageArgumentIterator ArgumentsEnd() const
     {
         return ReceivedMessageArgumentIterator( typeTagsEnd_, 0 );
@@ -524,12 +524,12 @@ public:
     uint32 ElementCount() const { return elementCount_; }
 
     typedef ReceivedBundleElementIterator const_iterator;
-    
+
 	ReceivedBundleElementIterator ElementsBegin() const
     {
         return ReceivedBundleElementIterator( timeTag_ + 8 );
     }
-     
+
 	ReceivedBundleElementIterator ElementsEnd() const
     {
         return ReceivedBundleElementIterator( end_ );
